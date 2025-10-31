@@ -43,6 +43,25 @@ router.get('/conversations/:conversationId', authMiddleware, async (req, res) =>
   });
 })
 
+router.post('/conversations', authMiddleware, async (req, res) => {
+  const userId = req.userId;
+  if(!userId) {
+    res.status(401).send('User not authenticated');
+    return;
+  }
+  const { title } = req.body;
+  const conversation = await prisma.conversation.create({
+    data: {
+      userId,
+      title,
+      id: randomUUID()
+    }
+  })
+  res.json({
+    conversation
+  });
+})
+
 router.post("/chat", authMiddleware, async (req, res)=> {
     const userId = req.userId;
     const {success, data} = chatSchema.safeParse(req.body);
@@ -84,8 +103,6 @@ router.post("/chat", authMiddleware, async (req, res)=> {
         role: Role.Agent,
         content: message
       })
-      // Save to database
-
       if(!data.conversationId) {
         if (!userId) {
           res.status(401).send('User not authenticated');
@@ -94,31 +111,79 @@ router.post("/chat", authMiddleware, async (req, res)=> {
         await prisma.conversation.create({
           data: {
             userId,
-            title: data.message.substring(0, 20) + '...',
+            title: "New Chat",
             id: conversationId
           }
         })
       }
-        await prisma.message.createMany({
-          data: [
-            {
-              conversationId,
-              content: data.message,
-              role: Role.User
-            },
-            {
-              conversationId,
-              content: message,
-              role: Role.Agent,
-            },
-          ]
+
+      const existingConversation = await prisma.conversation.findUnique({
+        where: {
+          id: conversationId
+        }
+      })
+      
+      if(existingConversation?.title === "New Chat") {
+        await prisma.conversation.update({
+          where: {
+            id: conversationId
+          },
+          data: {
+            title: data.message.substring(0, 20) + '...'
+          }
         })
-      
-      
+      }
+
+      await prisma.message.createMany({
+        data: [
+          {
+            conversationId,
+            content: data.message,
+            role: Role.User
+          },
+          {
+            conversationId,
+            content: message,
+            role: Role.Agent,
+          },
+        ]
+      })
     } catch (error) {
       res.status(500).send(`Internal server error: ${error}`);
       console.error(error);
+      return;
     }
-
 })
+
+router.delete('/conversations/:conversationId', authMiddleware, async (req, res) => {
+  const userId = req.userId;
+  const conversationId = req.params.conversationId;
+  const conversation = await prisma.conversation.findUnique({
+    where: {
+      id: conversationId,
+      userId
+    }
+  })
+  if(!conversation) {
+    res.status(404).send('Conversation not found');
+    return;
+  }
+  
+  await prisma.message.deleteMany({
+    where: {
+      conversationId: conversationId
+    }
+  })
+  
+  await prisma.conversation.delete({
+    where: {
+      id: conversationId
+    }
+  })
+  
+  res.json({
+    message: 'Conversation deleted successfully'
+  });
+})
+
 export default router;

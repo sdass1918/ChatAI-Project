@@ -3,7 +3,8 @@ import { useEffect, useState } from "react";
 interface Chat {
   id: string;
   title: string;
-  timestamp: Date;
+  createdAt: string;
+  updatedAt: string;
 }
 
 interface User {
@@ -38,25 +39,26 @@ export function Sidebar({
       }
       console.log(`Fetching conversations for user: ${token}`);
       try {
-          const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/ai/conversations`,
-            {
-              headers: {
-                Authorization: `Bearer ${token}`,
-              },
-            }
-          );
-          if (!response.ok) {
-            throw new Error(`HTTP error! Status: ${response.status}`);
+        const response = await fetch(
+          `${import.meta.env.VITE_BACKEND_URL}/ai/conversations`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
           }
+        );
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
 
-          const data = await response.json();
-          if (data && data.conversations) {
-            console.log(data.conversations);
-            setChats(data.conversations);
-          } else if (Array.isArray(data)) {
-            console.log(data);
-            setChats(data);
-          }
+        const data = await response.json();
+        if (data && data.conversations) {
+          console.log(data.conversations);
+          setChats(data.conversations);
+        } else if (Array.isArray(data)) {
+          console.log(data);
+          setChats(data);
+        }
       } catch (error) {
         console.error("Error fetching conversations:", error);
       }
@@ -64,21 +66,72 @@ export function Sidebar({
     getConversations();
   }, [user.token]);
 
-  const handleNewChat = () => {
-    const newChat: Chat = {
-      id: Date.now().toString(),
-      title: "New Chat",
-      timestamp: new Date(),
-    };
-    setChats([newChat, ...chats]);
-    onSelectChat(newChat.id);
+  const handleNewChat = async () => {
+    const token = localStorage.getItem("authToken");
+    if (!token) {
+      console.warn("No user token available");
+      return;
+    }
+    console.log(`Creating new chat for user: ${token}`);
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_BACKEND_URL}/ai/conversations`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            title: "New Chat",
+          }),
+        }
+      );
+
+      const data = await response.json();
+      console.log("New conversation created:", data);
+      const newConversation = data.conversation || data;
+      setChats([newConversation, ...chats]);
+
+      onSelectChat(newConversation.id);
+      onChatSelected(newConversation.id, []);
+    } catch (error) {
+      console.error("Error creating new chat:", error);
+    }
   };
 
-  const handleDeleteChat = (id: string, e: React.MouseEvent) => {
+  const handleDeleteChat = async (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
-    setChats(chats.filter((chat) => chat.id !== id));
-    if (currentChatId === id) {
-      onSelectChat(null);
+    const token = localStorage.getItem("authToken");
+    if (!token) {
+      console.warn("No user token available");
+      return;
+    }
+    console.log(`Deleting chat with id: ${id}`);
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_BACKEND_URL}/ai/conversations/${id}`,
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log("Chat deleted:", data);
+      setChats(chats.filter((chat) => chat.id !== id));
+      if (currentChatId === id) {
+        onSelectChat(null);
+      }
+    } catch (error) {
+      console.error("Error deleting chat:", error);
     }
   };
 
@@ -90,31 +143,48 @@ export function Sidebar({
     }
     console.log(`Opening chat with id: ${id}`);
     try {
-      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/ai/conversations/${id}`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      
+      const response = await fetch(
+        `${import.meta.env.VITE_BACKEND_URL}/ai/conversations/${id}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
       if (!response.ok) {
         throw new Error(`HTTP error! Status: ${response.status}`);
       }
-      
+
       const data = await response.json();
-      console.log(data);
-      
-      if (data && data.conversation && data.conversation.messages) {
-        console.log(data.conversation.messages);
-        // Pass both the conversation ID and messages to the parent
-        onChatSelected(data.conversation.id, data.conversation.messages);
-        onSelectChat(data.conversation.id);
+      console.log("Chat data received:", data);
+
+      // Handle different response structures
+      if (data && data.conversation) {
+        const conversation = data.conversation;
+        const messages = conversation.messages || [];
+        console.log("Messages:", messages);
+        onChatSelected(conversation.id, messages);
+        onSelectChat(conversation.id);
+      } else if (data && data.id) {
+        // Direct conversation object
+        const messages = data.messages || [];
+        console.log("Messages:", messages);
+        onChatSelected(data.id, messages);
+        onSelectChat(data.id);
       } else {
-        console.error("Error opening chat: No messages found in response");
+        console.error("Unexpected response structure:", data);
+        // Still select the chat even if no messages
+        onSelectChat(id);
+        onChatSelected(id, []);
       }
     } catch (error) {
       console.error("Error opening chat:", error);
+      // Fallback - still select the chat
+      onSelectChat(id);
+      onChatSelected(id, []);
     }
   };
 
@@ -135,7 +205,7 @@ export function Sidebar({
           {chats.map((chat) => (
             <div
               key={chat.id}
-              onClick={() => onSelectChat(chat.id)}
+              onClick={() => openChat(chat.id)}
               className={`
                 group flex items-center justify-between p-3 rounded-lg cursor-pointer
                 transition-colors
@@ -148,11 +218,9 @@ export function Sidebar({
             >
               <div className="flex items-center gap-3 flex-1 min-w-0">
                 <span className="text-gray-400">💬</span>
-                <button 
-                onClick={() => openChat(chat.id)}
-                className="text-sm truncate text-gray-200">
+                <span className="text-sm truncate text-gray-200">
                   {chat.title}
-                </button>
+                </span>
               </div>
               <button
                 onClick={(e) => handleDeleteChat(chat.id, e)}

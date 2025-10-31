@@ -36,7 +36,9 @@ export function ChatPanel({
   const [model, setModel] = useState<Model>(Model.gpt4o);
 
   useEffect(() => {
-    if (initialMessages.length > 0) {
+    if (conversationId === null) {
+      setMessages([]);
+    } else if (initialMessages.length > 0) {
       const transformedMessages = initialMessages.map((msg: any) => ({
         id: msg.id,
         role: msg.role === "agent" ? "assistant" : msg.role,
@@ -44,8 +46,10 @@ export function ChatPanel({
         timestamp: new Date(msg.createdAt),
       }));
       setMessages(transformedMessages);
+    } else {
+      setMessages([]);
     }
-  }, [initialMessages]);
+  }, [initialMessages, conversationId]);
 
   useEffect(() => {
     if (scrollRef.current) {
