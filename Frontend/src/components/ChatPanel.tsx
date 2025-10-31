@@ -24,11 +24,16 @@ interface ChatPanelProps {
   messages?: any[];
 }
 
-export function ChatPanel({ user, messages: initialMessages = [], conversationId }: ChatPanelProps) {
+export function ChatPanel({
+  user,
+  messages: initialMessages = [],
+  conversationId,
+}: ChatPanelProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const [model, setModel] = useState<Model>(Model.gpt4o);
 
   useEffect(() => {
     if (initialMessages.length > 0) {
@@ -67,15 +72,15 @@ export function ChatPanel({ user, messages: initialMessages = [], conversationId
 
     try {
       let body = {};
-      if(!conversationId) {
+      if (!conversationId) {
         body = {
-          model: Model.gpt4o,
+          model: model,
           message: input.trim(),
         };
       } else {
         body = {
           conversationId,
-          model: Model.gpt4o,
+          model: model,
           message: input.trim(),
         };
       }
@@ -177,6 +182,7 @@ export function ChatPanel({ user, messages: initialMessages = [], conversationId
                 </div>
               </div>
             ))}
+
             {isLoading && (
               <div className="flex justify-start">
                 <div className="bg-gray-700 text-gray-200 max-w-xs lg:max-w-md px-4 py-2 rounded-lg">
@@ -202,6 +208,18 @@ export function ChatPanel({ user, messages: initialMessages = [], conversationId
       </div>
 
       <div className="border-t border-[#2f2f2f] p-4">
+        <div className="p-4 flex justify-between">
+          <div className="flex gap-2">
+            <select
+              value={model}
+              onChange={(e) => setModel(e.target.value as Model)}
+              className="bg-[#2a2a2a] border border-[#4f4f4f] rounded-lg px-3 py-2 text-white placeholder-gray-400 focus:outline-none focus:border-blue-500"
+            >
+              <option value={Model.gpt4o}>GPT-4o</option>
+              <option value={Model.gpt35turbo}>GPT-3.5</option>
+            </select>
+          </div>
+        </div>
         <form onSubmit={handleSubmit} className="flex gap-2">
           <textarea
             value={input}
