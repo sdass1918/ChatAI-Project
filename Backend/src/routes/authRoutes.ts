@@ -21,16 +21,32 @@ router.post("/initiate_signin", async (req, res) => {
         }
         const email = data?.email;
 
+        console.log(email);
+
         const { otp, expires } = await TOTP.generate(base32.encode(email + process.env.JWT_SECRET!), { period: 300 });
 
         // We will then send the otp via mail for now lets console log it
         console.log(`The otp to login is : ${otp}`);
         try {
+            const existingUser = await prisma.user.findUnique({
+                where: {
+                    email: data.email
+                }
+            });
+            if(existingUser) {
+                console.log("User already exists");
+                res.json({
+                    message: `The otp to login is : ${otp}`,
+                    success: true
+                })
+                return;
+            }
             await prisma.user.create({
                 data: {
                     email: data.email
                 }
             })
+            console.log("User created");
         } catch (error) {
             res.status(500).send("Internal db error");
         }
