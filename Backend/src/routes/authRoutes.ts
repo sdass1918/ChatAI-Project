@@ -81,8 +81,8 @@ router.post("/signin", async (req, res) => {
     });
 
     if(!user) {
-        res.json({
-            message: "The user is not found in the database",
+        res.status(404).json({
+            error: "User not found in the database",
             success: false
         })
         return;
@@ -90,8 +90,8 @@ router.post("/signin", async (req, res) => {
 
     const {otp, expires} = await TOTP.generate(base32.encode(email + process.env.JWT_SECRET), {period: 300});
     if(otp != userOtp) {
-        res.json({
-            message: "Invalid otp",
+        res.status(401).json({
+            error: "Invalid OTP",
             success: false
         })
         return;

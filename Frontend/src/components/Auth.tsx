@@ -38,8 +38,7 @@ export const Auth: React.FC<AuthProps> = ({ onAuthenticated }) => {
         setFetchedOtp(data.otp);
         setOtpSent(true);
         setError("");
-      } 
-      if(otpSent) {
+      } else if (otpSent) {
         const response = await fetch(
           `${import.meta.env.VITE_BACKEND_URL}/auth/signin`,
           {
@@ -140,7 +139,6 @@ export const Auth: React.FC<AuthProps> = ({ onAuthenticated }) => {
             </div>
           )}
 
-          
           <button
             type="submit"
             disabled={isLoading}
@@ -173,7 +171,6 @@ export const Auth: React.FC<AuthProps> = ({ onAuthenticated }) => {
           </div>
         )}
 
-        
         {!otpSent && (
           <div className="mt-6 p-4 bg-[#2a2a2a]/50 rounded-lg border border-[#2f2f2f]">
             <p className="text-sm text-gray-400 text-center">

@@ -158,7 +158,7 @@ export function ChatPanel({
         {messages.length === 0 ? (
           <div className="flex items-center justify-center h-full">
             <div className="text-center text-gray-400">
-              <div className="text-6xl mb-4">🤖</div>
+              <div className="text-6xl mb-4">ChatAI</div>
               <h3 className="text-xl font-medium mb-2">Start a conversation</h3>
               <p>Ask me anything and I'll help you out!</p>
             </div>
