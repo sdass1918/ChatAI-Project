@@ -36,6 +36,7 @@ router.post("/initiate_signin", async (req, res) => {
             if(existingUser) {
                 console.log("User already exists");
                 res.json({
+                    otp,
                     message: `The otp to login is : ${otp}`,
                     success: true
                 })
@@ -51,6 +52,7 @@ router.post("/initiate_signin", async (req, res) => {
             res.status(500).send("Internal db error");
         }
         res.json({
+            otp,
             message: `The otp to login is : ${otp}`,
             success: true
         })

@@ -1,4 +1,6 @@
 import { useEffect, useState } from "react";
+import { UserMenu } from "./UserMenu";
+import { ChatOptionsMenu } from "./ChatOptions";
 
 interface Chat {
   id: string;
@@ -100,8 +102,7 @@ export function Sidebar({
     }
   };
 
-  const handleDeleteChat = async (id: string, e: React.MouseEvent) => {
-    e.stopPropagation();
+  const handleDeleteChat = async (id: string) => {
     const token = localStorage.getItem("authToken");
     if (!token) {
       console.warn("No user token available");
@@ -217,38 +218,22 @@ export function Sidebar({
               `}
             >
               <div className="flex items-center gap-3 flex-1 min-w-0">
-                <span className="text-gray-400">💬</span>
                 <span className="text-sm truncate text-gray-200">
                   {chat.title}
                 </span>
               </div>
-              <button
-                onClick={(e) => handleDeleteChat(chat.id, e)}
-                className="opacity-0 group-hover:opacity-100 transition-opacity text-gray-400 hover:text-red-400"
-              >
-                🗑️
-              </button>
+              <ChatOptionsMenu onDelete={() => handleDeleteChat(chat.id)} />
             </div>
           ))}
         </div>
       </div>
 
-      {/* User Info and Sign Out */}
       <div className="p-3 border-t border-[#2f2f2f]">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2 min-w-0">
-            <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center flex-shrink-0">
-              <span className="text-white text-sm">👤</span>
-            </div>
             <span className="text-sm text-gray-300 truncate">{user.email}</span>
+            <UserMenu user={user} onSignOut={onSignOut} />
           </div>
-          <button
-            onClick={onSignOut}
-            className="text-gray-400 hover:text-white p-1 rounded transition-colors"
-            title="Sign Out"
-          >
-            🚪
-          </button>
         </div>
       </div>
     </div>
