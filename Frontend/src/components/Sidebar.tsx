@@ -18,7 +18,7 @@ interface User {
 interface SidebarProps {
   currentChatId: string | null;
   onSelectChat: (id: string | null) => void;
-  onChatSelected: (chatId: string, messages: any[]) => void;
+  onChatSelected: (chatId: string, messages: any[], title?: string) => void;
   user: User;
   onSignOut: () => void;
 }
@@ -95,8 +95,9 @@ export function Sidebar({
       const newConversation = data.conversation || data;
       setChats([newConversation, ...chats]);
 
+      // Select the new chat and initialize with empty messages
       onSelectChat(newConversation.id);
-      onChatSelected(newConversation.id, []);
+      onChatSelected(newConversation.id, [], newConversation.title);
     } catch (error) {
       console.error("Error creating new chat:", error);
     }
@@ -167,25 +168,25 @@ export function Sidebar({
         const conversation = data.conversation;
         const messages = conversation.messages || [];
         console.log("Messages:", messages);
-        onChatSelected(conversation.id, messages);
+        onChatSelected(conversation.id, messages, conversation.title);
         onSelectChat(conversation.id);
       } else if (data && data.id) {
         // Direct conversation object
         const messages = data.messages || [];
         console.log("Messages:", messages);
-        onChatSelected(data.id, messages);
+        onChatSelected(data.id, messages, data.title);
         onSelectChat(data.id);
       } else {
         console.error("Unexpected response structure:", data);
         // Still select the chat even if no messages
         onSelectChat(id);
-        onChatSelected(id, []);
+        onChatSelected(id, [], "");
       }
     } catch (error) {
       console.error("Error opening chat:", error);
       // Fallback - still select the chat
       onSelectChat(id);
-      onChatSelected(id, []);
+      onChatSelected(id, [], "");
     }
   };
 

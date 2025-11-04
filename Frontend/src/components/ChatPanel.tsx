@@ -25,12 +25,14 @@ interface ChatPanelProps {
   conversationId: string | null;
   user: User;
   messages?: any[];
+  conversationTitle?: string;
 }
 
 export function ChatPanel({
   user,
   messages: initialMessages = [],
   conversationId,
+  conversationTitle = "",
 }: ChatPanelProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
@@ -155,6 +157,12 @@ export function ChatPanel({
     }
   };
 
+  const shouldShowInputArea = () => {
+    if (messages.length > 0) return true;
+    if (conversationId && conversationTitle === "New Chat") return true;
+    return false;
+  };
+
   return (
     <div className="flex-1 flex flex-col bg-[#212121] text-white">
       <div ref={scrollRef} className="flex-1 overflow-y-auto p-4">
@@ -182,7 +190,7 @@ export function ChatPanel({
                       : "bg-gray-700 text-gray-200"
                   }`}
                 >
-                <div className="whitespace-pre-wrap">{message.content}</div>
+                  <div className="whitespace-pre-wrap">{message.content}</div>
                   <div className="text-xs mt-1 opacity-70">
                     {new Date(message.timestamp).toLocaleTimeString()}
                   </div>
@@ -214,45 +222,52 @@ export function ChatPanel({
         )}
       </div>
 
-      <div className="border-t border-[#2f2f2f] p-4">
-        <div className="p-4 flex justify-between">
-          <div className="flex gap-2">
-            <select
-              value={model}
-              onChange={(e) => setModel(e.target.value as Model)}
-              className="bg-[#2a2a2a] border border-[#4f4f4f] rounded-lg px-3 py-2 text-white placeholder-gray-400 focus:outline-none focus:border-blue-500"
-            >
-              <option value={Model.gpt4o}>GPT-4o</option>
-              <option value={Model.deepseekChat}>Deepseek</option>
-              <option value={Model.gpt_oss_20b}>GPT-OSS-20B</option>
-              <option value={Model.qwen_qwen3_coder_free}>Qwen Qwen3 Coder</option>
-              <option value={Model.google_gemini_2_0_flash_exp_free}>Google Gemini 2.0 Flash Exp</option>
-            </select>
+      {shouldShowInputArea() && (
+        <div className="border-t border-[#2f2f2f] p-4">
+          <div className="p-4 flex justify-between">
+            <div className="flex gap-2">
+              <select
+                value={model}
+                onChange={(e) => setModel(e.target.value as Model)}
+                className="bg-[#2a2a2a] border border-[#4f4f4f] rounded-lg px-3 py-2 text-white placeholder-gray-400 focus:outline-none focus:border-blue-500"
+              >
+                <option value={Model.gpt4o}>GPT-4o</option>
+                <option value={Model.deepseekChat}>Deepseek</option>
+                <option value={Model.gpt_oss_20b}>GPT-OSS-20B</option>
+                <option value={Model.qwen_qwen3_coder_free}>
+                  Qwen Qwen3 Coder
+                </option>
+                <option value={Model.google_gemini_2_0_flash_exp_free}>
+                  Google Gemini 2.0 Flash Exp
+                </option>
+              </select>
+            </div>
           </div>
+
+          <form onSubmit={handleSubmit} className="flex gap-2">
+            <textarea
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={handleKeyDown}
+              placeholder="Type your message here..."
+              disabled={isLoading}
+              className="flex-1 resize-none bg-[#2a2a2a] border border-[#4f4f4f] rounded-lg px-3 py-2 text-white placeholder-gray-400 focus:outline-none focus:border-blue-500 disabled:opacity-50"
+              rows={1}
+              style={{
+                minHeight: "40px",
+                maxHeight: "120px",
+              }}
+            />
+            <button
+              type="submit"
+              disabled={!input.trim() || isLoading}
+              className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white px-4 py-2 rounded-lg transition-colors flex items-center justify-center"
+            >
+              <span>→</span>
+            </button>
+          </form>
         </div>
-        <form onSubmit={handleSubmit} className="flex gap-2">
-          <textarea
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={handleKeyDown}
-            placeholder="Type your message here..."
-            disabled={isLoading}
-            className="flex-1 resize-none bg-[#2a2a2a] border border-[#4f4f4f] rounded-lg px-3 py-2 text-white placeholder-gray-400 focus:outline-none focus:border-blue-500 disabled:opacity-50"
-            rows={1}
-            style={{
-              minHeight: "40px",
-              maxHeight: "120px",
-            }}
-          />
-          <button
-            type="submit"
-            disabled={!input.trim() || isLoading}
-            className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white px-4 py-2 rounded-lg transition-colors flex items-center justify-center"
-          >
-            <span>→</span>
-          </button>
-        </form>
-      </div>
+      )}
     </div>
   );
 }

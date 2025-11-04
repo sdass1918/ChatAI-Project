@@ -13,6 +13,7 @@ interface User {
 function App() {
   const [currentChatId, setCurrentChatId] = useState<string | null>(null);
   const [currentMessages, setCurrentMessages] = useState<any[]>([]);
+  const [currentChatTitle, setCurrentChatTitle] = useState<string>("");
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -45,15 +46,21 @@ function App() {
     setUser(null);
     setCurrentChatId(null);
     setCurrentMessages([]);
+    setCurrentChatTitle("");
     // Clear localStorage
     localStorage.removeItem("authToken");
     localStorage.removeItem("userEmail");
     localStorage.removeItem("userId");
   };
 
-  const handleChatSelected = (conversationId: string, messages: any[]) => {
+  const handleChatSelected = (
+    conversationId: string,
+    messages: any[],
+    title?: string
+  ) => {
     setCurrentChatId(conversationId);
     setCurrentMessages(messages);
+    setCurrentChatTitle(title || "");
   };
 
   // Show loading spinner while checking authentication
@@ -83,7 +90,12 @@ function App() {
         user={user}
         onSignOut={handleSignOut}
       />
-      <ChatPanel conversationId={currentChatId} user={user} messages={currentMessages} />
+      <ChatPanel
+        conversationId={currentChatId}
+        user={user}
+        messages={currentMessages}
+        conversationTitle={currentChatTitle}
+      />
     </div>
   );
 }
