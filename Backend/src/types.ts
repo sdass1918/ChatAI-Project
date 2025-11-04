@@ -1,6 +1,10 @@
 import {z} from 'zod';
 export enum Model {
-    "openai/gpt-4o" = "openai/gpt-4o"
+    "openai/gpt-4o" = "openai/gpt-4o",
+    "deepseek/deepseek-chat-v3.1:free" = "deepseek/deepseek-chat-v3.1:free",
+    "openai/gpt-oss-20b:free" = "openai/gpt-oss-20b:free",
+    "qwen/qwen3-coder:free" = "qwen/qwen3-coder:free",
+    "google/gemini-2.0-flash-exp:free" = "google/gemini-2.0-flash-exp:free",
 }
 const Max_Input_Token = 1000;
 export const chatSchema = z.object({

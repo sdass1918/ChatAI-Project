@@ -9,7 +9,10 @@ interface Message {
 
 enum Model {
   gpt4o = "openai/gpt-4o",
-  gpt35turbo = "gpt-3.5-turbo",
+  deepseekChat = "deepseek/deepseek-chat-v3.1:free",
+  gpt_oss_20b = "openai/gpt-oss-20b:free",
+  qwen_qwen3_coder_free = "qwen/qwen3-coder:free",
+  google_gemini_2_0_flash_exp_free = "google/gemini-2.0-flash-exp:free",
 }
 
 interface User {
@@ -43,7 +46,7 @@ export function ChatPanel({
         id: msg.id,
         role: msg.role === "agent" ? "assistant" : msg.role,
         content: msg.content,
-        timestamp: new Date(msg.createdAt),
+        timestamp: new Date(),
       }));
       setMessages(transformedMessages);
     } else {
@@ -179,9 +182,9 @@ export function ChatPanel({
                       : "bg-gray-700 text-gray-200"
                   }`}
                 >
-                  <div className="whitespace-pre-wrap">{message.content}</div>
+                <div className="whitespace-pre-wrap">{message.content}</div>
                   <div className="text-xs mt-1 opacity-70">
-                    {message.timestamp.toLocaleTimeString()}
+                    {new Date(message.timestamp).toLocaleTimeString()}
                   </div>
                 </div>
               </div>
@@ -220,7 +223,10 @@ export function ChatPanel({
               className="bg-[#2a2a2a] border border-[#4f4f4f] rounded-lg px-3 py-2 text-white placeholder-gray-400 focus:outline-none focus:border-blue-500"
             >
               <option value={Model.gpt4o}>GPT-4o</option>
-              <option value={Model.gpt35turbo}>GPT-3.5</option>
+              <option value={Model.deepseekChat}>Deepseek</option>
+              <option value={Model.gpt_oss_20b}>GPT-OSS-20B</option>
+              <option value={Model.qwen_qwen3_coder_free}>Qwen Qwen3 Coder</option>
+              <option value={Model.google_gemini_2_0_flash_exp_free}>Google Gemini 2.0 Flash Exp</option>
             </select>
           </div>
         </div>
