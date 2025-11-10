@@ -94,7 +94,7 @@
 
 ## 🎨 Screenshots
 
-[!Demo Screenshots](./assets/demo.png)
+![Demo Screenshots](./assets/demo.png)
 
 ## 🔧 API Endpoints
 
