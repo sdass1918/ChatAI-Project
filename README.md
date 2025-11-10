@@ -2,6 +2,9 @@
 
 > A lightning-fast, cost-effective AI chat platform with multiple models and intelligent conversation management. 
 
+## Database Model
+![Database Schema](./assets/prismaliser.png)
+
 ## 🚀 Key Features
 
 - **Multiple AI Models**: Choose from GPT-4o, Deepseek Chat, Qwen Coder, Google Gemini, and more
