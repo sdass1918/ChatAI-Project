@@ -49,9 +49,9 @@ router.post("/initiate_signin", async (req, res) => {
             })
             console.log("User created");
         } catch (error) {
-            res.status(500).send("Internal db error");
+            return res.status(500).json({error: `Internal db error: ${error}`});
         }
-        res.json({
+        return res.json({
             otp,
             message: `The otp to login is : ${otp}`,
             success: true
@@ -59,7 +59,7 @@ router.post("/initiate_signin", async (req, res) => {
 
         
     } catch (error) {
-        res.json({
+        return res.json({
             message: "Internal server error",
             success: false
         })
