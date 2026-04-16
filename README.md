@@ -54,6 +54,14 @@
 - Node.js 18+
 - PostgreSQL database
 - OpenRouter API key
+- Docker and Docker Compose for easy setup
+
+Check:
+```bash
+node -v
+docker --version
+docker compose version
+```
 
 ### Installation
 
@@ -63,36 +71,23 @@
    git clone https://github.com/sdass1918/ChatAI-Project.git
    cd ChatAI-Project
    ```
-
-2. **Setup Backend**
-
-   ```bash
-   cd Backend
-   npm install
-   # Configure your environment variables
-   npx prisma migrate dev
-   npm run dev
-   ```
-
-3. **Setup Frontend**
-
-   ```bash
-   cd frontend
-   npm install
-   # Configure your environment variables
-   npm run dev
-   ```
-
-4. **Environment Variables**
+   
+2. **Environment Variables**
 
    ```env
    # Backend (.env)
-   DATABASE_URL="your_postgresql_url"
+   DATABASE_URL=postgresql://postgres:postgres@db:5432/chatai
    JWT_SECRET="your_jwt_secret"
    OPENROUTER_API_KEY="your_openrouter_key"
 
    # Frontend (.env)
    VITE_BACKEND_URL="http://localhost:3000"
+   ```
+
+3. **🐳 Run the Project**
+
+   ```bash
+   docker compose up --build
    ```
 
 ## 🎨 Screenshots
