@@ -14,7 +14,7 @@ export const sendMessage = async (model: Model, messages: Messages, cb: (chunk: 
             'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-            model,
+            model: 'openrouter/fusion',
             messages: messages,
             stream: true,
         }),
